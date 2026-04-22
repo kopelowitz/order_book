@@ -80,7 +80,8 @@ PriceLevel& OrderBook::getPriceLevel(std::map<Price, PriceLevel, T>& map, const 
 }
 
 template<typename T>
-TradeAccumulator OrderBook::trade(std::map<Price, PriceLevel, T>& map, const Order& order) {
+TradeAccumulator OrderBook::trade(std::map<Price, PriceLevel, T>& map, const Order& order)
+{
     TradeAccumulator trade_summary = TradeAccumulator(order.remaining_quantity);
     while (!map.empty() && trade_summary.remaining_quantity() > 0)
     {
