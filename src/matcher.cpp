@@ -11,7 +11,7 @@ MatchResult limitOrder(OrderBook& order_book, const Order& order)
         auto remaining_quantity = trade_summary.remaining_quantity();
         if (remaining_quantity > 0)
         {
-            auto remaining_order = Order(order, remaining_quantity);
+            auto remaining_order = Order(order.id, order.price, remaining_quantity, order.side);
             order_book.add(remaining_order);
             return MatchResult::partiallyFilled(trade_summary.total_executed, remaining_quantity, std::move(trade_summary.trades));
         }
