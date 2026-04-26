@@ -22,7 +22,6 @@ struct Order {
     Price price;
     Quantity remaining_quantity;
     Side side;
-    //TODO: add timestamp
 
     Order(OrderId id, Price price, Quantity remaining_quantity, Side side):
         id(id), price(price), remaining_quantity(remaining_quantity), side(side) {}
@@ -83,7 +82,7 @@ struct TradeAccumulator
 struct PriceLevel {
     Price price;
     Quantity total_quantity;
-    std::list<Order> orders; //TODO: use deque
+    std::list<Order> orders;
     Side side;
 
     PriceLevel(const Side side, const Price price):
@@ -124,7 +123,7 @@ public:
     
     using OrdersById = std::unordered_map<OrderId, OrderIterator>;
     template<typename T> using OrderMap = std::map<Price, PriceLevel, T>;
-    using BidMap = OrderMap<std::greater<Price>>; //TODO add hot array for price ticks close to sod price
+    using BidMap = OrderMap<std::greater<Price>>; 
     using AskMap = OrderMap<std::less<Price>>;
 
     OrderBook() = default;

@@ -14,7 +14,7 @@ bool OrderBook::cancel(const OrderId id)
     if (map_it == orders_by_id.end()) return false;
 
     const OrderIterator order_it = map_it->second;
-    const Side side  = order_it->side;  
+    const Side side = order_it->side;  
     const Price price = order_it->price;
 
     PriceLevel& price_level = getPriceLevel(side, price);

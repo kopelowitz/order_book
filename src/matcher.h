@@ -1,35 +1,35 @@
 #pragma once
 #include <cstdint>
+#include <variant>
 #include "order_book.h"
 
-enum class OrderStatus {
-    FILLED,
-    PARTIALLY_FILLED,
-    OPEN
-};
+struct Filled {                                                                                                                                            
+      Quantity executed_quantity;
+      std::vector<Trade> trades;
+      Filled(Quantity executed_quantity, std::vector<Trade> trades)
+        : executed_quantity(executed_quantity), trades(std::move(trades)) {};
+  };
 
-struct MatchResult { //TODO: make variant
-    OrderStatus status;
-    Quantity executed_quantity = 0;
-    Quantity remaining_quantity = 0;
+struct PartiallyFilled {
+    Quantity executed_quantity;
+    Quantity remaining_quantity;
     std::vector<Trade> trades;
-
-    static MatchResult open(Quantity remaining_quantity) {
-        return MatchResult(OrderStatus::OPEN, 0, remaining_quantity, {});
-    }
-
-    static MatchResult filled(Quantity executed_quantity, std::vector<Trade> trades) {
-        return MatchResult(OrderStatus::FILLED, executed_quantity, 0, std::move(trades));
-    }
-
-    static MatchResult partiallyFilled(Quantity executed_quantity, Quantity remaining_quantity, std::vector<Trade> trades) {
-        return MatchResult(OrderStatus::PARTIALLY_FILLED, executed_quantity, remaining_quantity, std::move(trades));
-    }
-
-private:
-    MatchResult(OrderStatus status, Quantity executed_quantity, Quantity remaining_quantity, std::vector<Trade> trades):
-        status(status), executed_quantity(executed_quantity), remaining_quantity(remaining_quantity), trades(std::move(trades)) {}
+    PartiallyFilled(Quantity executed_quantity, Quantity remaining_quantity, std::vector<Trade> trades)
+        : executed_quantity(executed_quantity), remaining_quantity(remaining_quantity), trades(std::move(trades)) {};
 };
 
-MatchResult limitOrder(OrderBook& order_book, const Order& order);
-MatchResult marketOrder(OrderBook& order_book, const Side side, const Quantity quantity);
+struct OpenResult {
+    Quantity executed_quantity;
+    OpenResult(Quantity executed_quantity): executed_quantity(executed_quantity) {};
+};
+
+struct NoLiquidityResult {
+    Quantity unfilled_quantity;
+    NoLiquidityResult(Quantity unfilled_quantity): unfilled_quantity{unfilled_quantity} {};
+};
+
+using LimitOrderResult = std::variant<Filled, PartiallyFilled, OpenResult>;
+using MarketOrderResult = std::variant<Filled, PartiallyFilled, NoLiquidityResult>;
+
+LimitOrderResult limitOrder(OrderBook& order_book, const Order& order);
+MarketOrderResult marketOrder(OrderBook& order_book, const OrderId id, const Side side, const Quantity quantity);
