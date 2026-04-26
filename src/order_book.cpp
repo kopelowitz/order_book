@@ -30,16 +30,20 @@ bool OrderBook::cancel(const OrderId id)
     return true;
 }
 
-TradeAccumulator OrderBook::tradeQuantity(const Order& order)
+TradeAccumulator OrderBook::tradeLimitOrder(const Order& order)
 {
     if (order.side == Side::BID)
-    {
-        return trade(ask_map, order);  // buy matches asks
-    }
+        return trade(ask_map, order.quantity, [&](Price p){ return order.isMatch(p); });
     else
-    {
-        return trade(bid_map, order);  // sell matches bids
-    }
+        return trade(bid_map, order.quantity, [&](Price p){ return order.isMatch(p); });
+}
+
+TradeAccumulator OrderBook::tradeMarketOrder(Side side, Quantity quantity)
+{
+    if (side == Side::BID)
+        return trade(ask_map, quantity, [](Price){ return true; });
+    else
+        return trade(bid_map, quantity, [](Price){ return true; });
 }
 
 PriceLevel& OrderBook::getPriceLevel(const Side side, const Price price)
@@ -64,6 +68,11 @@ PriceLevel* OrderBook::getBestAskLevel()
     return getBestLevel(ask_map);
 }
 
+PriceLevel* OrderBook::getBestCounterpartyLevel(const Side side)
+{
+    return side == Side::BID ? getBestAskLevel() : getBestBidLevel();
+}
+
 template<typename T>
 PriceLevel* OrderBook::getBestLevel(std::map<Price, PriceLevel, T>& map)
 {
@@ -78,19 +87,19 @@ PriceLevel& OrderBook::getPriceLevel(std::map<Price, PriceLevel, T>& map, const 
     return it->second;
 }
 
-template<typename T>
-TradeAccumulator OrderBook::trade(std::map<Price, PriceLevel, T>& map, const Order& order)
+template<typename T, typename MatchFn>
+TradeAccumulator OrderBook::trade(std::map<Price, PriceLevel, T>& map, Quantity quantity, MatchFn isMatch)
 {
-    TradeAccumulator trade_accumulator = TradeAccumulator(order.quantity);
+    TradeAccumulator trade_accumulator{quantity};
     while (!map.empty() && trade_accumulator.remaining_quantity() > 0)
     {
         auto& [price, level] = *map.begin();
 
-        if (!level.isMatch(order.price)) break;
-        
-        Quantity remaining_quantity = trade_accumulator.remaining_quantity();
-        Quantity traded_quantity = tradeLevelQuantity(level, remaining_quantity);
-        trade_accumulator.addTrade(Trade(invert(level.side), level.price, remaining_quantity - traded_quantity));
+        if (!isMatch(price)) break;
+
+        Quantity remaining = trade_accumulator.remaining_quantity();
+        Quantity leftover = tradeLevelQuantity(level, remaining);
+        trade_accumulator.addTrade(Trade(invert(level.side), level.price, remaining - leftover));
 
         if (level.isEmpty())
             map.erase(price);

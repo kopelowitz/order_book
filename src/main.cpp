@@ -15,14 +15,6 @@ int main() {
         res.set_content(body.dump(), "application/json");
     });
 
-    server.Get("/api/orders", [](const httplib::Request&, httplib::Response& res) {
-        
-    });
-
-    server.Post("/api/orders", [](const httplib::Request& req, httplib::Response& res) {
-       
-    });
-
     std::cout << "Server listening on http://localhost:8080" << std::endl;
     return server.listen("0.0.0.0", 8080) ? 0 : 1;
 }
