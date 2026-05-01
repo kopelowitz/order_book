@@ -74,14 +74,14 @@ TradeAccumulator OrderBook::tradeMarketOrder(Side side, Quantity quantity)
 
 // ===== Best-level accessors (no lock - see header note) =====
 
-PriceLevel* OrderBook::getBestBidLevel()         { return getBestLevel(bid_map); }
-PriceLevel* OrderBook::getBestAskLevel()         { return getBestLevel(ask_map); }
+PriceLevel* OrderBook::getBestBidLevel() { return getBestLevel(bid_map); }
+PriceLevel* OrderBook::getBestAskLevel() { return getBestLevel(ask_map); }
 PriceLevel* OrderBook::getBestCounterpartyLevel(Side side)
 {
     return side == Side::BID ? getBestAskLevel() : getBestBidLevel();
 }
 
-// ===== Unlocked helpers (precondition: caller holds `mutex`) =====
+// ===== Unlocked helpers (precondition: caller holds mutex) =====
 
 bool OrderBook::addUnlocked(const Order& order)
 {
@@ -150,7 +150,7 @@ void OrderBook::pruneGoodForDayOrdersIn(std::map<Price, PriceLevel, T>& map)
         }
 
         // Erase by iterator (and capture the next valid iterator) - erasing
-        // by key would invalidate `map_it` and corrupt the loop.
+        // by key would invalidate map_it and corrupt the loop.
         if (level.isEmpty())
             map_it = map.erase(map_it);
         else

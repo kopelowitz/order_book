@@ -5,6 +5,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(nlohmann_json CONFIG REQUIRED)
+find_package(Threads REQUIRED)
 
 if(DEFINED VCPKG_TARGET_TRIPLET)
     include_directories(${CMAKE_BINARY_DIR}/vcpkg_installed/${VCPKG_TARGET_TRIPLET}/include)
@@ -13,6 +14,7 @@ endif()
 # --- Core library (shared by server, tests, and benchmarks) ---
 add_library(order_book_lib STATIC src/order_book.cpp src/day_order_pruner.cpp)
 target_include_directories(order_book_lib PUBLIC src)
+target_link_libraries(order_book_lib PUBLIC Threads::Threads)
 
 if(MSVC)
     target_compile_options(order_book_lib PRIVATE /W4 /O2)

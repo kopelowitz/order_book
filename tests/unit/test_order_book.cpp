@@ -169,7 +169,6 @@ TEST(OrderBookBest, EmptyBookReturnsNull) {
 
 // ---- OrderBook::tradeLimitOrder ----
 // These tests exercise the trade-only primitive (no residual placement).
-
 TEST(OrderBookTrade, NoMatchEmptyBook) {
     OrderBook ob;
     EXPECT_TRUE(ob.tradeLimitOrder(makeOrder(1, 100, 10, Side::BID)).trades.empty());

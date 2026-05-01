@@ -15,10 +15,10 @@
 //
 // The "Best level" accessors (getBestBidLevel / getBestAskLevel /
 // getBestCounterpartyLevel) return raw pointers into the book's maps. They
-// are intended for single-threaded inspection (e.g. tests, or a single owner
-// thread between mutating calls). Concurrent mutators may invalidate the
-// returned pointer; do not call these from multiple threads without external
-// coordination.
+// are intended for single-threaded inspection (e.g. tests, or a single
+// owner thread between mutating calls). Concurrent mutators may invalidate
+// the returned pointer; do not call these from multiple threads without
+// external coordination.
 class OrderBook {
 public:
     using OrdersById = std::unordered_map<OrderId, OrderIterator>;
@@ -47,7 +47,7 @@ public:
     PriceLevel* getBestCounterpartyLevel(Side side);
 
 private:
-    // Unlocked variants - precondition: caller holds `mutex`.
+    // Unlocked variants - precondition: caller holds mutex.
     bool addUnlocked(const Order& order);
     bool cancelUnlocked(OrderId id);
     TradeAccumulator tradeLimitOrderUnlocked(const Order& order);
