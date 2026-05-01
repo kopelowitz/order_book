@@ -18,11 +18,8 @@ std::tm toLocalTm(std::time_t t)
 
 } // namespace
 
-GoodForDayPruner::GoodForDayPruner(std::function<void()> on_fire,
-                                   NextFireFn next_fire)
-    : on_fire(std::move(on_fire)),
-      next_fire(std::move(next_fire)),
-      thread([this] { run(); }) {}
+GoodForDayPruner::GoodForDayPruner(std::function<void()> on_fire, NextFireFn next_fire): 
+    on_fire(std::move(on_fire)), next_fire(std::move(next_fire)), thread([this] { run(); }) {}
 
 GoodForDayPruner::~GoodForDayPruner()
 {
@@ -42,8 +39,6 @@ void GoodForDayPruner::run()
         const auto fire_at = next_fire(Clock::now());
 
         std::unique_lock lock{ mutex };
-        // wait_until with a predicate returns true if the predicate became
-        // satisfied (shutdown was signaled), false on timeout.
         const bool shutdown_signaled = cv.wait_until(lock, fire_at, [this] {
             return shutdown.load(std::memory_order_acquire);
         });
@@ -56,9 +51,7 @@ void GoodForDayPruner::run()
     }
 }
 
-GoodForDayPruner::Clock::time_point
-GoodForDayPruner::nextDailyCutoff(Clock::time_point now,
-                                  std::chrono::hours cutoff_hour)
+GoodForDayPruner::Clock::time_point GoodForDayPruner::nextDailyCutoff(Clock::time_point now, std::chrono::hours cutoff_hour)
 {
     const auto now_c = Clock::to_time_t(now);
     std::tm parts = toLocalTm(now_c);
